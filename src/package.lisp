@@ -1,0 +1,2 @@
+(defpackage :gravedigger
+  (:use :cl))
