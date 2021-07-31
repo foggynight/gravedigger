@@ -104,9 +104,9 @@ DIRECTION determines the direction with which to split the region:
 - 0 (horizontal): Split the region into top and bottom sub-regions
 - 1 (vertical): Split the region into left and right sub-regions
 
-Should the split result in one of the sub-regions having an area of zero, nil
-will be returned for that sub-region, this may cause the cons pair to appear to
-be a list if it is the second sub-region which is invalid.
+Should the split result in one of the sub-regions being invalid, nil will be
+returned for that sub-region. This may cause the cons pair returned from this
+function to appear to be a list if it is the second sub-region which is invalid.
 
 e.g.
 
