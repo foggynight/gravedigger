@@ -11,4 +11,6 @@ tile-based games."
   :components ((:file "package")
 
                (:file "tile")
-               (:file "dungeon")))
+               (:file "dungeon")
+
+               (:file "region"))
