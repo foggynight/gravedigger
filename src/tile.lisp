@@ -1,6 +1,6 @@
 (in-package :gravedigger)
 
-(defparameter *default-tile-symbol* #\?)
+(defparameter *default-tile-symbol* #\space)
 
 (defstruct tile
   "Tile structure representing a tile in a dungeon."
