@@ -1,2 +1,3 @@
 (defpackage :gravedigger
-  (:use :cl))
+  (:use :cl)
+  (:export :main))
