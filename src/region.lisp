@@ -21,10 +21,16 @@ a cons containing the y-x pair of coordinates."))
    "Region class representing a region of a dungeon, used to divide a
 dungeon into regions and sub-regions."))
 
-(defun make-region (top-left bottom-right)
+(defun make-region (&optional (top-left '(0 . 0)) (bottom-right '(0 . 0)))
   "Make a new region object."
   (make-instance 'region :top-left top-left
                          :bottom-right bottom-right))
+
+(defmethod print-object ((obj region) stream)
+  (format stream
+          "#<REGION :TOP-LEFT ~A :BOTTOM-RIGHT ~A>"
+          (region-top-left obj)
+          (region-bottom-right obj)))
 
 (defun region-top-left-y (region)
   "Get the y coordinate of the top-left corner tile of a region."
@@ -127,19 +133,19 @@ function to appear to be a list if it is the second sub-region which is invalid.
 
 e.g.
 
-(split-region #S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)) 0 0.25)
-=> (#S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (0 . 3))
-    . #S(REGION :TOP-LEFT (1 . 0) :BOTTOM-RIGHT (3 . 3)))
+(split-region (make-region '(0 . 0) '(3 . 3)) 0 0.25)
+=> (#<REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (0 . 3)>
+    . #<REGION :TOP-LEFT (1 . 0) :BOTTOM-RIGHT (3 . 3)>)
 
-(split-region #S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (4 . 4)) 1 0.5)
-=> (#S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (4 . 1))
-    . #S(REGION :TOP-LEFT (0 . 2) :BOTTOM-RIGHT (4 . 4)))
+(split-region (make-region '(0 . 0) '(4 . 4)) 1 0.5)
+=> (#<REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (4 . 1)>
+    . #<REGION :TOP-LEFT (0 . 2) :BOTTOM-RIGHT (4 . 4)>)
 
-(split-region #S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)) 0 0.0)
-=> (NIL . #S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)))
+(split-region (make-region '(0 . 0) '(3 . 3)) 0 0.0)
+=> (NIL . #<REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)>)
 
-(split-region #S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)) 0 1.0)
-=> (#S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)))"
+(split-region (make-region '(0 . 0) '(3 . 3)) 0 1.0)
+=> (#<REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)>)"
   (unless (verify-region region)
     (error (format nil "Error: Invalid region: ~A" region)))
   (when (or (< position 0)
