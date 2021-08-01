@@ -7,28 +7,36 @@
 
 (in-package :gravedigger)
 
-(defparameter *min-room-length* 3
-  "Minimum height and width of a room. Three is the minimum as rooms must
-contain at least one walkable tile that is surrounded by wall and door tiles.")
+(defparameter *default-min-room-length* 5
+  "Default minimum height and width of a room.
 
-;; TODO Replace min room length special variable with optional parameter
-;; TODO Add max room length optional parameter
-(defun get-random-room-dimensions (region)
-  "Get random room dimensions based on *MIN-ROOM-LENGTH* and the dimensions of
-REGION.
+Three is the minimum sensible value as rooms must contain at least one walkable
+tile, and the walkable tiles must be surrounded by wall and door tiles.")
 
-If either dimension of REGION is less than *MIN-ROOM-LENGTH*, this function
-returns NIL, otherwise, it returns a cons pair containing the random height and
-width of a room that can fit within REGION."
+(defparameter *default-max-room-length* 5
+  "Default maximum height and width of a room.")
+
+(defun get-random-room-dimensions (region
+                                   &key
+                                     (min-room-length *default-min-room-length*)
+                                     (max-room-length *default-max-room-length*))
+  "Get a y-x pair of random room dimensions based on the room length parameters
+and the dimensions of REGION.
+
+If either dimension of REGION is less than MIN-ROOM-LENGTH, this function
+returns NIL, otherwise, it returns a cons pair containing the height and width
+of a random room that can fit within REGION."
   (let ((region-height (region-height region))
         (region-width (region-width region)))
-    (if (or (< region-height *min-room-length*)
-            (< region-width *min-room-length*))
+    (if (or (< region-height min-room-length)
+            (< region-width min-room-length))
         nil
-        (cons (+ *min-room-length*
-                 (random (1+ (- region-height *min-room-length*))))
-              (+ *min-room-length*
-                 (random (1+ (- region-width *min-room-length*))))))))
+        (cons (min (+ min-room-length
+                      (random (1+ (- region-height min-room-length))))
+                   max-room-length)
+              (min (+ min-room-length
+                      (random (1+ (- region-width min-room-length))))
+                   max-room-length)))))
 
 ;; TODO Add centering factor
 (defun get-random-room-region (region room-dimensions)
