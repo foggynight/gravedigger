@@ -11,6 +11,9 @@ tile-based games."
   :components ((:file "package")
 
                (:file "tile")
+               (:file "region")
                (:file "dungeon")
 
-               (:file "region")))
+               (:file "bsp-rooms")
+
+               (:file "main")))

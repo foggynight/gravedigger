@@ -25,6 +25,14 @@ and are represented by a cons containing a y-x pair of coordinates."
   "Get the x coordinate of the bottom-right corner tile of a region."
   (cdr (region-bottom-right region)))
 
+(defun region-height (region)
+  "Get the height of a region."
+  (1+ (- (region-bottom-right-y region) (region-top-left-y region))))
+
+(defun region-width (region)
+  "Get the width of a region."
+  (1+ (- (region-bottom-right-x region) (region-top-left-x region))))
+
 (defun verify-region (region)
   "Verify that a region is valid, i.e. are the coordinates of the top-left
 corner tile less-than or equal-to the coordinates of the bottom-right corner

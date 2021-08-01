@@ -24,6 +24,12 @@
   "Get the width of a dungeon in number of tiles."
   (array-dimension (dungeon-tiles dungeon) 1))
 
+(defun set-dungeon-region-tile-symbol (dungeon region symbol)
+  "Set the tile symbol of the tiles within the given region of a dungeon."
+  (loop for y from (region-top-left-y region) to (region-bottom-right-y region)
+        do (loop for x from (region-top-left-x region) to (region-bottom-right-x region)
+                 do (setf (tile-symbol (aref (dungeon-tiles dungeon) y x)) symbol))))
+
 (defun print-dungeon (dungeon)
   "Print the text representation of a dungeon to standard output."
   (let ((tiles (dungeon-tiles dungeon)))
