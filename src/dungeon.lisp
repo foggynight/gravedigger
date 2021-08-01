@@ -7,7 +7,7 @@
 
 (defstruct dungeon
   "Dungeon structure representing a dungeon in the world."
-  (tiles nil :type simple-array))
+  (tiles #2A() :type simple-array))
 
 (defun generate-dungeon (&key
                            (height *default-dungeon-height*)
