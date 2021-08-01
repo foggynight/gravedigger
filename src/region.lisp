@@ -1,36 +1,13 @@
 (in-package :gravedigger)
 
-(defclass region ()
-  ((top-left
-    :accessor region-top-left
-    :initarg :top-left
-    :initform '(0 . 0)
-    :type cons
-    :documentation
-    "Coordinates of the top-left corner tile of this region, represented by a
-cons containing the y-x pair of coordinates.")
-   (bottom-right
-    :accessor region-bottom-right
-    :initarg :bottom-right
-    :initform '(0 . 0)
-    :type cons
-    :documentation
-    "Coordinates of the bottom-right corner tile of this region, represented by
-a cons containing the y-x pair of coordinates."))
-  (:documentation
-   "Region class representing a region of a dungeon, used to divide a
-dungeon into regions and sub-regions."))
+(defstruct region
+  "Region structure representing a region of a dungeon, used to divide a dungeon
+into regions and sub-regions.
 
-(defun make-region (&optional (top-left '(0 . 0)) (bottom-right '(0 . 0)))
-  "Make a new region object."
-  (make-instance 'region :top-left top-left
-                         :bottom-right bottom-right))
-
-(defmethod print-object ((obj region) stream)
-  (format stream
-          "#<REGION :TOP-LEFT ~A :BOTTOM-RIGHT ~A>"
-          (region-top-left obj)
-          (region-bottom-right obj)))
+Top-left and bottom-right refer to the corresponding corner tiles of the region,
+and are represented by a cons containing a y-x pair of coordinates."
+  (top-left '(0 . 0) :type cons)
+  (bottom-right '(0 . 0) :type cons))
 
 (defun region-top-left-y (region)
   "Get the y coordinate of the top-left corner tile of a region."
@@ -87,15 +64,15 @@ of it, as this function does not check the validity of its arguments."
   (let ((height (1+ (- (region-bottom-right-y region)
                        (region-top-left-y region)))))
     (cons (verify-sub-region region
-                             (make-region (region-top-left region)
-                                          (cons (1- (+ (region-top-left-y region)
-                                                       (floor (* height position))))
-                                                (region-bottom-right-x region))))
+                             (make-region :top-left (region-top-left region)
+                                          :bottom-right (cons (1- (+ (region-top-left-y region)
+                                                                     (floor (* height position))))
+                                                              (region-bottom-right-x region))))
           (verify-sub-region region
-                             (make-region (cons (+ (region-top-left-y region)
-                                                   (floor (* height position)))
-                                                (region-top-left-x region))
-                                          (region-bottom-right region))))))
+                             (make-region :top-left (cons (+ (region-top-left-y region)
+                                                             (floor (* height position)))
+                                                          (region-top-left-x region))
+                                          :bottom-right (region-bottom-right region))))))
 
 (defun split-region-vertically (region position)
   "Vertically split a region into left and right sub-regions and return them as
@@ -106,15 +83,15 @@ of it, as this function does not check the validity of its arguments."
   (let ((width (1+ (- (region-bottom-right-x region)
                       (region-top-left-x region)))))
     (cons (verify-sub-region region
-                             (make-region (region-top-left region)
-                                          (cons (region-bottom-right-y region)
-                                                (1- (+ (region-top-left-x region)
-                                                       (floor (* width position)))))))
+                             (make-region :top-left (region-top-left region)
+                                          :bottom-right (cons (region-bottom-right-y region)
+                                                              (1- (+ (region-top-left-x region)
+                                                                     (floor (* width position)))))))
           (verify-sub-region region
-                             (make-region (cons (region-top-left-y region)
-                                                (+ (region-top-left-x region)
-                                                   (floor (* width position))))
-                                          (region-bottom-right region))))))
+                             (make-region :top-left (cons (region-top-left-y region)
+                                                          (+ (region-top-left-x region)
+                                                             (floor (* width position))))
+                                          :bottom-right (region-bottom-right region))))))
 
 (defun split-region (region direction position)
   "Split a region into two sub-regions and return them as a cons pair.
@@ -133,19 +110,19 @@ function to appear to be a list if it is the second sub-region which is invalid.
 
 e.g.
 
-(split-region (make-region '(0 . 0) '(3 . 3)) 0 0.25)
-=> (#<REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (0 . 3)>
-    . #<REGION :TOP-LEFT (1 . 0) :BOTTOM-RIGHT (3 . 3)>)
+(split-region (make-region :top-left '(0 . 0) :bottom-right '(3 . 3)) 0 0.25)
+=> (#S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (0 . 3))
+    . #S(REGION :TOP-LEFT (1 . 0) :BOTTOM-RIGHT (3 . 3)))
 
-(split-region (make-region '(0 . 0) '(4 . 4)) 1 0.5)
-=> (#<REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (4 . 1)>
-    . #<REGION :TOP-LEFT (0 . 2) :BOTTOM-RIGHT (4 . 4)>)
+(split-region (make-region :top-left '(0 . 0) :bottom-right '(4 . 4)) 1 0.5)
+=> (#S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (4 . 1))
+    . #S(REGION :TOP-LEFT (0 . 2) :BOTTOM-RIGHT (4 . 4)))
 
-(split-region (make-region '(0 . 0) '(3 . 3)) 0 0.0)
-=> (NIL . #<REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)>)
+(split-region (make-region :top-left '(0 . 0) :bottom-right '(3 . 3)) 0 0.0)
+=> (NIL . #S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)))
 
-(split-region (make-region '(0 . 0) '(3 . 3)) 0 1.0)
-=> (#<REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)>)"
+(split-region (make-region :top-left '(0 . 0) :bottom-right '(3 . 3)) 0 1.0)
+=> (#S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3))) "
   (unless (verify-region region)
     (error (format nil "Error: Invalid region: ~A" region)))
   (when (or (< position 0)
