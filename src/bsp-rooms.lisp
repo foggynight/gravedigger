@@ -7,13 +7,13 @@
 
 (in-package :gravedigger)
 
-(defparameter *default-min-room-length* 5
+(defparameter *default-min-room-length* 3
   "Default minimum height and width of a room.
 
 Three is the minimum sensible value as rooms must contain at least one walkable
 tile, and the walkable tiles must be surrounded by wall and door tiles.")
 
-(defparameter *default-max-room-length* 5
+(defparameter *default-max-room-length* 20
   "Default maximum height and width of a room.")
 
 (defun get-random-room-dimensions (region
@@ -38,7 +38,6 @@ of a random room that can fit within REGION."
                       (random (1+ (- region-width min-room-length))))
                    max-room-length)))))
 
-;; TODO Add centering factor
 (defun get-random-room-region (region room-dimensions)
   "Get the region representing a room of size ROOM-DIMENSIONS placed at a random
 position within REGION, this function assumes there is a valid position for the
@@ -47,6 +46,25 @@ room to be placed within REGION."
                                  (car room-dimensions)))))
         (offset-x (random (1+ (- (region-width region)
                                  (cdr room-dimensions))))))
+    (make-region :top-left (cons (+ (region-top-left-y region) offset-y)
+                                 (+ (region-top-left-x region) offset-x))
+                 :bottom-right (cons (+ (region-top-left-y region)
+                                        offset-y
+                                        (1- (car room-dimensions)))
+                                     (+ (region-top-left-x region)
+                                        offset-x
+                                        (1- (cdr room-dimensions)))))))
+
+(defun get-centered-room-region (region room-dimensions)
+  "Get the region representing a room of size ROOM-DIMENSIONS placed in the
+center of REGION, this function assumes there is a valid position for the room
+to be placed within REGION."
+  (let ((offset-y (floor (- (region-height region)
+                            (car room-dimensions))
+                         2))
+        (offset-x (floor (- (region-width region)
+                            (cdr room-dimensions))
+                         2)))
     (make-region :top-left (cons (+ (region-top-left-y region) offset-y)
                                  (+ (region-top-left-x region) offset-x))
                  :bottom-right (cons (+ (region-top-left-y region)
@@ -91,18 +109,23 @@ room to be placed within REGION."
                    do (setf (tile-symbol (aref (dungeon-tiles dungeon) y x))
                             (get-tile-symbol 'floor))))))
 
-(defun add-random-room (dungeon region)
-  "Add a room to the given region of a dungeon, the room is of random size and
-placed at a random position such that it fits within the region, if no room can
-fit within the region, this function does nothing.
+(defun add-random-room (dungeon region &optional (random-placement nil))
+  "Add a room to the given region of a dungeon. The room is of random size and
+is placed in the center of the region unless RANDOM-PLACEMENT is non-nil, in
+which case the room is placed at a random position within the region.
 
 This function must be called only once on a given region, as it does not check
-for other rooms, only for the boundaries of the region."
+for other rooms, only for the boundaries of the region.
+
+If no room can fit within the region, this function does nothing."
   (let* ((room-dimensions (get-random-room-dimensions region))
          (height (car room-dimensions))
          (width (cdr room-dimensions)))
     (unless (or (null height) (null width))
-      (add-room-tiles dungeon (get-random-room-region region room-dimensions)))))
+      (add-room-tiles dungeon
+                      (if random-placement
+                          (get-random-room-region region room-dimensions)
+                          (get-centered-room-region region room-dimensions))))))
 
 (defun get-random-deviation (deviation)
   "Get a random value within the range: +/- DEVATION."
@@ -123,8 +146,8 @@ for other rooms, only for the boundaries of the region."
        (region (make-region :top-left (cons 0 0)
                             :bottom-right (cons (1- (dungeon-height dungeon))
                                                 (1- (dungeon-width dungeon)))))
-       (center-deviation 0.25)
-       (recursion-depth 4))
+       (center-deviation 0.05)
+       (recursion-depth 3))
   "Generate a dungeon containing rooms connected by corridors using the BSP
 Rooms algorithm.
 
