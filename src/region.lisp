@@ -39,10 +39,11 @@ corner tile less-than or equal-to the coordinates of the bottom-right corner
 tile.
 
 Returns nil if the region is invalid, otherwise returns the region."
-  (cond ((null region) nil)
-        ((> (region-top-left-y region) (region-bottom-right-y region)) nil)
-        ((> (region-top-left-x region) (region-bottom-right-x region)) nil)
-        (t region)))
+  (if (or (null region)
+          (> (region-top-left-y region) (region-bottom-right-y region))
+          (> (region-top-left-x region) (region-bottom-right-x region)))
+      nil
+      region))
 
 (defun verify-sub-region (region sub-region)
   "Verify that a sub-region is a valid sub-region of another region, i.e. does
@@ -52,16 +53,17 @@ This function expects that the other region has already been verified to be a
 valid region.
 
 Returns nil if the sub-region is invalid, otherwise returns the sub-region."
-  (cond ((null sub-region) nil)
-        ((< (region-top-left-y sub-region) (region-top-left-y region)) nil)
-        ((< (region-top-left-x sub-region) (region-top-left-x region)) nil)
-        ((> (region-bottom-right-y sub-region) (region-bottom-right-y region)) nil)
-        ((> (region-bottom-right-x sub-region) (region-bottom-right-x region)) nil)
-        ((> (region-top-left-y sub-region) (region-bottom-right-y region)) nil)
-        ((> (region-top-left-x sub-region) (region-bottom-right-x region)) nil)
-        ((< (region-bottom-right-y sub-region) (region-top-left-y region)) nil)
-        ((< (region-bottom-right-x sub-region) (region-top-left-x region)) nil)
-        (t sub-region)))
+  (if (or (null sub-region)
+          (< (region-top-left-y sub-region) (region-top-left-y region))
+          (< (region-top-left-x sub-region) (region-top-left-x region))
+          (> (region-bottom-right-y sub-region) (region-bottom-right-y region))
+          (> (region-bottom-right-x sub-region) (region-bottom-right-x region))
+          (> (region-top-left-y sub-region) (region-bottom-right-y region))
+          (> (region-top-left-x sub-region) (region-bottom-right-x region))
+          (< (region-bottom-right-y sub-region) (region-top-left-y region))
+          (< (region-bottom-right-x sub-region) (region-top-left-x region)))
+      nil
+      sub-region))
 
 (defun split-region-horizontally (region position)
   "Horizontally split a region into top and bottom sub-regions and return them
