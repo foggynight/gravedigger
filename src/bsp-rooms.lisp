@@ -7,19 +7,23 @@
 
 (in-package :gravedigger)
 
-(defparameter *default-min-room-length* 3
+(defparameter *default-min-room-length* 5
   "Default minimum height and width of a room.
 
 Three is the minimum sensible value as rooms must contain at least one walkable
 tile, and the walkable tiles must be surrounded by wall and door tiles.")
 
-(defparameter *default-max-room-length* 20
+(defparameter *default-max-room-length* 16
   "Default maximum height and width of a room.")
 
-(defun get-random-room-dimensions (region
-                                   &key
-                                     (min-room-length *default-min-room-length*)
-                                     (max-room-length *default-max-room-length*))
+(defparameter *default-squareness-threshold* 0.25
+  "Default squareness threshold used in GET-SPLIT-DIRECTION.")
+
+(defun get-random-room-dimensions
+    (region
+     &key
+       (min-room-length *default-min-room-length*)
+       (max-room-length *default-max-room-length*))
   "Get a y-x pair of random room dimensions based on the room length parameters
 and the dimensions of REGION.
 
@@ -76,11 +80,11 @@ to be placed within REGION."
 
 (defun add-room-tiles (dungeon room)
   "Add the floor and wall tiles of a room to a dungeon."
-  ;; Add corner tiles
   (let ((tly (region-top-left-y room))
         (tlx (region-top-left-x room))
         (bry (region-bottom-right-y room))
         (brx (region-bottom-right-x room)))
+    ;; Add corner tiles
     (setf (tile-symbol (aref (dungeon-tiles dungeon) tly tlx))
           (get-tile-symbol 'cwall)
           (tile-symbol (aref (dungeon-tiles dungeon) tly brx))
@@ -126,26 +130,36 @@ If no room can fit within the region, this function does nothing."
                           (get-centered-room-region region room-dimensions))))))
 
 (defun get-random-deviation (deviation)
-  "Get a random value within the range: +/- DEVATION."
+  "Get a random value within the range: +/- DEVATION"
   (float (* deviation (/ (- (random 201) 100) 100))))
 
-(defun get-random-center-deviation (center-deviation)
-  "Get a random value within the range: 0.5 +/- CENTER-DEVIATION."
-  (+ 0.5 (get-random-deviation center-deviation)))
+(defun get-random-center-deviation (deviation)
+  "Get a random value within the range: 0.5 +/- DEVIATION"
+  (+ 0.5 (get-random-deviation deviation)))
+
+(defun get-split-direction
+    (region
+     &key (squareness-threshold *default-squareness-threshold*))
+  "Get a direction along which to split a region based on its dimensions,
+returns the direction represented by a number:
+- 0 (horizontal): Split the region into top and bottom sub-regions
+- 1 (vertical): Split the region into left and right sub-regions"
+  (let ((squareness (region-squareness region)))
+    (if (< (abs squareness) squareness-threshold)
+        (random 2)
+        (if (> squareness 0) 0 1))))
 
 ;; TODO Implement this
 (defun connect-region-pair (region-pair))
 
-;; TODO Improve the distribution of splits and room placement, currently, the
-;; splitting often leads to long narrow rooms that are packed together.
 (defun generate-bsp-rooms
     (&key
        (dungeon (generate-dungeon :symbol #\space))
        (region (make-region :top-left (cons 0 0)
                             :bottom-right (cons (1- (dungeon-height dungeon))
                                                 (1- (dungeon-width dungeon)))))
-       (center-deviation 0.05)
-       (recursion-depth 3))
+       (center-deviation 0.25)
+       (recursion-depth 4))
   "Generate a dungeon containing rooms connected by corridors using the BSP
 Rooms algorithm.
 
@@ -155,7 +169,7 @@ function will then modify that dungeon instead of generating a new one."
     (if (zerop recursion-depth)
         (add-random-room dungeon region)
         (let* ((position (get-random-center-deviation center-deviation))
-               (direction (random 2))
+               (direction (get-split-direction region))
                (split-region-pair (split-region region direction position)))
           (generate-bsp-rooms :dungeon dungeon
                               :region (car split-region-pair)

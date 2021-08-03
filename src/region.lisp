@@ -33,6 +33,17 @@ and are represented by a cons containing a y-x pair of coordinates."
   "Get the width of a region."
   (1+ (- (region-bottom-right-x region) (region-top-left-x region))))
 
+(defun region-squareness (region)
+  "Get the squareness of a region, where squareness refers to how similar the
+height and width of a region are and is represented by a number:
+- = 0: height = width
+- < 0: height < width
+- > 0: height > width"
+  (flet ((mean (a b) (/ (+ a b) 2)))
+    (let ((h (region-height region))
+          (w (region-width region)))
+      (/ (- h w) (mean h w)))))
+
 (defun verify-region (region)
   "Verify that a region is valid, i.e. are the coordinates of the top-left
 corner tile less-than or equal-to the coordinates of the bottom-right corner
@@ -106,7 +117,7 @@ of it, as this function does not check the validity of its arguments."
 (defun split-region (region direction position)
   "Split a region into two sub-regions and return them as a cons pair.
 
-DIRECTION determines the direction with which to split the region:
+DIRECTION determines the direction along which to split the region:
 - 0 (horizontal): Split the region into top and bottom sub-regions
 - 1 (vertical): Split the region into left and right sub-regions
 
