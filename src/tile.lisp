@@ -26,5 +26,6 @@
   (make-array (list height width)
               :initial-contents (make-tile-list2 height width symbol)))
 
-(defun get-tile-symbol (tile-type)
-  (cdr (assoc tile-type *tile-type-symbol-alist*)))
+(defun tile_type->symbol (type)
+  "Get the symbol associated with a tile type."
+  (cdr (assoc type *tile-type-symbol-alist*)))
