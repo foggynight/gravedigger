@@ -30,11 +30,11 @@
         do (loop for x from (region-top-left-x region) to (region-bottom-right-x region)
                  do (setf (tile-symbol (aref (dungeon-tiles dungeon) y x)) symbol))))
 
-(defun print-dungeon (dungeon)
-  "Print the text representation of a dungeon to standard output."
+(defun print-dungeon (dungeon &optional (stream *standard-output*))
+  "Print the text representation of a dungeon STREAM."
   (let ((tiles (dungeon-tiles dungeon)))
-    (fresh-line)
+    (fresh-line stream)
     (dotimes (y (array-dimension tiles 0))
       (dotimes (x (array-dimension tiles 1))
-        (princ (tile-symbol (aref tiles y x))))
-      (terpri))))
+        (princ (tile-symbol (aref tiles y x)) stream))
+      (terpri stream))))
