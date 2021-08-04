@@ -136,9 +136,11 @@ e.g.
           (setq second-top-left (cons (region-top-left-y region)
                                       (+ (region-top-left-x region)
                                          (floor (* width position)))))))
-    (cons (verify-sub-region region
-                             (make-region :top-left (region-top-left region)
-                                          :bottom-right first-bottom-right))
-          (verify-sub-region region
-                             (make-region :top-left second-top-left
-                                          :bottom-right (region-bottom-right region))))))
+    (cons (verify-sub-region
+           region
+           (make-region :top-left (region-top-left region)
+                        :bottom-right first-bottom-right))
+          (verify-sub-region
+           region
+           (make-region :top-left second-top-left
+                        :bottom-right (region-bottom-right region))))))
