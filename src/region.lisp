@@ -76,44 +76,6 @@ Returns nil if the sub-region is invalid, otherwise returns the sub-region."
       nil
       sub-region))
 
-(defun split-region-horizontally (region position)
-  "Horizontally split a region into top and bottom sub-regions and return them
-as a cons pair.
-
-This is an auxiliary function of SPLIT-REGION and should not be called outside
-of it, as this function does not check the validity of its arguments."
-  (let ((height (1+ (- (region-bottom-right-y region)
-                       (region-top-left-y region)))))
-    (cons (verify-sub-region region
-                             (make-region :top-left (region-top-left region)
-                                          :bottom-right (cons (1- (+ (region-top-left-y region)
-                                                                     (floor (* height position))))
-                                                              (region-bottom-right-x region))))
-          (verify-sub-region region
-                             (make-region :top-left (cons (+ (region-top-left-y region)
-                                                             (floor (* height position)))
-                                                          (region-top-left-x region))
-                                          :bottom-right (region-bottom-right region))))))
-
-(defun split-region-vertically (region position)
-  "Vertically split a region into left and right sub-regions and return them as
-a cons pair.
-
-This is an auxiliary function of SPLIT-REGION and should not be called outside
-of it, as this function does not check the validity of its arguments."
-  (let ((width (1+ (- (region-bottom-right-x region)
-                      (region-top-left-x region)))))
-    (cons (verify-sub-region region
-                             (make-region :top-left (region-top-left region)
-                                          :bottom-right (cons (region-bottom-right-y region)
-                                                              (1- (+ (region-top-left-x region)
-                                                                     (floor (* width position)))))))
-          (verify-sub-region region
-                             (make-region :top-left (cons (region-top-left-y region)
-                                                          (+ (region-top-left-x region)
-                                                             (floor (* width position))))
-                                          :bottom-right (region-bottom-right region))))))
-
 (defun split-region (region direction position)
   "Split a region into two sub-regions and return them as a cons pair.
 
@@ -143,12 +105,40 @@ e.g.
 => (NIL . #S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)))
 
 (split-region (make-region :top-left '(0 . 0) :bottom-right '(3 . 3)) 0 1.0)
-=> (#S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3))) "
+=> (#S(REGION :TOP-LEFT (0 . 0) :BOTTOM-RIGHT (3 . 3)))"
   (unless (verify-region region)
     (error (format nil "Error: Invalid region: ~A" region)))
+  (when (or (not (integerp direction))
+            (< direction 0)
+            (> direction 1))
+    (error (format nil "Error: Invalid direction: ~A" direction)))
   (when (or (< position 0)
             (> position 1))
     (error (format nil "Error: Invalid position: ~A" position)))
-  (cond ((zerop direction) (split-region-horizontally region position))
-        ((= direction 1) (split-region-vertically region position))
-        (t (error (format nil "Error: Invalid direction: ~A" direction)))))
+  (let ((first-bottom-right nil)
+        (second-top-left nil))
+    (if (zerop direction)
+        ;; Split horizontally
+        (let ((height (1+ (- (region-bottom-right-y region)
+                             (region-top-left-y region)))))
+          (setq first-bottom-right (cons (1- (+ (region-top-left-y region)
+                                                (floor (* height position))))
+                                         (region-bottom-right-x region)))
+          (setq second-top-left (cons (+ (region-top-left-y region)
+                                         (floor (* height position)))
+                                      (region-top-left-x region))))
+        ;; Split vertically
+        (let ((width (1+ (- (region-bottom-right-x region)
+                            (region-top-left-x region)))))
+          (setq first-bottom-right (cons (region-bottom-right-y region)
+                                         (1- (+ (region-top-left-x region)
+                                                (floor (* width position))))))
+          (setq second-top-left (cons (region-top-left-y region)
+                                      (+ (region-top-left-x region)
+                                         (floor (* width position)))))))
+    (cons (verify-sub-region region
+                             (make-region :top-left (region-top-left region)
+                                          :bottom-right first-bottom-right))
+          (verify-sub-region region
+                             (make-region :top-left second-top-left
+                                          :bottom-right (region-bottom-right region))))))
