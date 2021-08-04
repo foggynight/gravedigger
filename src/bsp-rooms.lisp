@@ -12,12 +12,18 @@
 
 Three is the minimum sensible value as rooms must contain at least one walkable
 tile, and the walkable tiles must be surrounded by wall and door tiles.")
-
-(defparameter *default-max-room-length* 16
+(defparameter *default-max-room-length* 25
   "Default maximum height and width of a room.")
 
+(defparameter *default-center-deviation* 0.25
+  "Default center deviation used to decide what position on which to split a
+region in GENERATE-BSP-ROOMS.")
+(defparameter *default-recursion-depth* 4
+  "Default recursion depth of GENERATE-BSP-ROOMS, determines how many levels of
+sub-regions to split the region covering a dungeon into.")
 (defparameter *default-squareness-threshold* 0.25
-  "Default squareness threshold used in GET-SPLIT-DIRECTION.")
+  "Default squareness threshold used to decide what direction to split a region
+in GET-SPLIT-DIRECTION and GENERATE-BSP-ROOMS.")
 
 (defun get-random-room-dimensions
     (region
@@ -139,7 +145,7 @@ If no room can fit within the region, this function does nothing."
 
 (defun get-split-direction
     (region
-     &key (squareness-threshold *default-squareness-threshold*))
+     &optional (squareness-threshold *default-squareness-threshold*))
   "Get a direction along which to split a region based on its dimensions,
 returns the direction represented by a number:
 - 0 (horizontal): Split the region into top and bottom sub-regions
@@ -158,8 +164,9 @@ returns the direction represented by a number:
        (region (make-region :top-left (cons 0 0)
                             :bottom-right (cons (1- (dungeon-height dungeon))
                                                 (1- (dungeon-width dungeon)))))
-       (center-deviation 0.25)
-       (recursion-depth 4))
+       (center-deviation *default-center-deviation*)
+       (recursion-depth *default-recursion-depth*)
+       (squareness-threshold *default-squareness-threshold*))
   "Generate a dungeon containing rooms connected by corridors using the BSP
 Rooms algorithm.
 
@@ -169,7 +176,7 @@ function will then modify that dungeon instead of generating a new one."
     (if (zerop recursion-depth)
         (add-random-room dungeon region)
         (let* ((position (get-random-center-deviation center-deviation))
-               (direction (get-split-direction region))
+               (direction (get-split-direction region squareness-threshold))
                (split-region-pair (split-region region direction position)))
           (generate-bsp-rooms :dungeon dungeon
                               :region (car split-region-pair)
