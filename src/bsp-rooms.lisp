@@ -48,33 +48,26 @@ of a random room that can fit within REGION."
                       (random (1+ (- region-width min-room-length))))
                    max-room-length)))))
 
-(defun get-random-room-region (region room-dimensions)
-  "Get the region representing a room of size ROOM-DIMENSIONS placed at a random
-position within REGION, this function assumes there is a valid position for the
-room to be placed within REGION."
-  (let ((offset-y (random (1+ (- (region-height region)
-                                 (car room-dimensions)))))
-        (offset-x (random (1+ (- (region-width region)
-                                 (cdr room-dimensions))))))
-    (make-region :top-left (cons (+ (region-top-left-y region) offset-y)
-                                 (+ (region-top-left-x region) offset-x))
-                 :bottom-right (cons (+ (region-top-left-y region)
-                                        offset-y
-                                        (1- (car room-dimensions)))
-                                     (+ (region-top-left-x region)
-                                        offset-x
-                                        (1- (cdr room-dimensions)))))))
-
-(defun get-centered-room-region (region room-dimensions)
+(defun get-room-region (region room-dimensions &optional (random-placement nil))
   "Get the region representing a room of size ROOM-DIMENSIONS placed in the
 center of REGION, this function assumes there is a valid position for the room
-to be placed within REGION."
-  (let ((offset-y (floor (- (region-height region)
-                            (car room-dimensions))
-                         2))
-        (offset-x (floor (- (region-width region)
-                            (cdr room-dimensions))
-                         2)))
+to be placed within REGION.
+
+Optionally, a non-nil argument may be passed for RANDOM-PLACEMENT, in which case
+the room region is randomly placed within the region instead of at its center."
+  (let ((offset-y nil)
+        (offset-x nil))
+    (if random-placement
+        (setq offset-y (random (1+ (- (region-height region)
+                                      (car room-dimensions))))
+              offset-x (random (1+ (- (region-width region)
+                                      (cdr room-dimensions)))))
+        (setq offset-y (floor (- (region-height region)
+                                 (car room-dimensions))
+                              2)
+              offset-x (floor (- (region-width region)
+                                 (cdr room-dimensions))
+                              2)))
     (make-region :top-left (cons (+ (region-top-left-y region) offset-y)
                                  (+ (region-top-left-x region) offset-x))
                  :bottom-right (cons (+ (region-top-left-y region)
@@ -130,10 +123,9 @@ If no room can fit within the region, this function does nothing."
          (height (car room-dimensions))
          (width (cdr room-dimensions)))
     (unless (or (null height) (null width))
-      (add-room-tiles dungeon
-                      (if random-placement
-                          (get-random-room-region region room-dimensions)
-                          (get-centered-room-region region room-dimensions))))))
+      (add-room-tiles dungeon (get-room-region region
+                                               room-dimensions
+                                               random-placement)))))
 
 (defun get-random-deviation (deviation)
   "Get a random value within the range: +/- DEVATION"
