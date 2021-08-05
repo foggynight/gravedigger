@@ -30,22 +30,25 @@ in GET-SPLIT-DIRECTION and GENERATE-BSP-ROOMS.")
      &key
        (min-room-length *default-min-room-length*)
        (max-room-length *default-max-room-length*))
-  "Get a y-x pair of random room dimensions based on the room length parameters
-and the dimensions of REGION.
+  "Get the dimensions of a random room whose size is determined by the
+dimensions of REGION and the room length parameters.
 
-If either dimension of REGION is less than MIN-ROOM-LENGTH, this function
-returns NIL, otherwise, it returns a cons pair containing the height and width
-of a random room that can fit within REGION."
+If no room can fit within REGION, this function returns NIL, otherwise, it
+returns a cons pair containing the height and width of the random room.
+
+For a room to fit within REGION, there must be a position within REGION where
+the room can be placed such that it lies completely within REGION, with a
+one-tile gap between the walls of the room and the edges of REGION."
   (let ((region-height (region-height region))
         (region-width (region-width region)))
-    (if (or (< region-height min-room-length)
-            (< region-width min-room-length))
+    (if (or (< (- region-height 2) min-room-length)
+            (< (- region-width 2) min-room-length))
         nil
         (cons (min (+ min-room-length
-                      (random (1+ (- region-height min-room-length))))
+                      (random (1+ (- (- region-height 2) min-room-length))))
                    max-room-length)
               (min (+ min-room-length
-                      (random (1+ (- region-width min-room-length))))
+                      (random (1+ (- (- region-width 2) min-room-length))))
                    max-room-length)))))
 
 (defun get-room-region (region room-dimensions &optional (random-placement nil))
@@ -53,15 +56,16 @@ of a random room that can fit within REGION."
 center of REGION, this function assumes there is a valid position for the room
 to be placed within REGION.
 
-Optionally, a non-nil argument may be passed for RANDOM-PLACEMENT, in which case
-the room region is randomly placed within the region instead of at its center."
+Should RANDOM-PLACEMENT be non-nil, the room region is randomly placed within
+REGION such that there is a one-tile gap between the walls of the room and the
+edges of the region, instead of at REGION's center."
   (let ((offset-y nil)
         (offset-x nil))
     (if random-placement
-        (setq offset-y (random (1+ (- (region-height region)
-                                      (car room-dimensions))))
-              offset-x (random (1+ (- (region-width region)
-                                      (cdr room-dimensions)))))
+        (setq offset-y (1+ (random (1+ (- (- (region-height region) 2)
+                                          (car room-dimensions)))))
+              offset-x (1+ (random (1+ (- (- (region-width region) 2)
+                                          (cdr room-dimensions))))))
         (setq offset-y (floor (- (region-height region)
                                  (car room-dimensions))
                               2)
