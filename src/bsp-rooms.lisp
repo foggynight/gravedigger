@@ -138,8 +138,13 @@ If no room can fit within the region, this function does nothing."
 (defun get-split-direction
     (region
      &optional (squareness-threshold *default-squareness-threshold*))
-  "Get a direction along which to split a region based on its dimensions,
-returns the direction represented by a number:
+  "Get a direction along which to split a region based on its squareness.
+
+If the squareness of the region is below SQUARENESS-THRESHOLD, the direction is
+chosen randomly, otherwise the chosen direction is that which splits the larger
+dimension.
+
+The direction is represented by a number:
 - 0 (horizontal): Split the region into top and bottom sub-regions
 - 1 (vertical): Split the region into left and right sub-regions"
   (let ((squareness (region-squareness region)))
