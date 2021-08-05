@@ -155,31 +155,50 @@ The direction is represented by a number:
 ;; TODO Implement this
 (defun connect-region-pair (region-pair))
 
+(defun generate-bsp-rooms-aux (dungeon
+                               region
+                               recursion-depth
+                               center-deviation
+                               squareness-threshold)
+  "Auxiliary function to GENERATE-BSP-ROOMS, should not be called on its own!"
+  ;; Must check if the region is null and do nothing if so, as region splitting
+  ;; in recursively higher level calls to GENERATE-BSP-ROOMS-AUX may result in
+  ;; invalid regions should CENTER-DEVIATION be great enough.
+  (unless (null region)
+    (if (zerop recursion-depth)
+        (add-random-room dungeon region)
+        (let* ((position (get-random-center-deviation center-deviation))
+               (direction (get-split-direction region squareness-threshold))
+               (region-pair (split-region region direction position)))
+          (generate-bsp-rooms-aux dungeon
+                                  (car region-pair)
+                                  (1- recursion-depth)
+                                  center-deviation
+                                  squareness-threshold)
+          (generate-bsp-rooms-aux dungeon
+                                  (cdr region-pair)
+                                  (1- recursion-depth)
+                                  center-deviation
+                                  squareness-threshold)
+          (connect-region-pair region-pair)))))
+
 (defun generate-bsp-rooms
     (&key
        (dungeon (generate-dungeon :symbol #\space))
        (region (make-region :top-left (cons 0 0)
                             :bottom-right (cons (1- (dungeon-height dungeon))
                                                 (1- (dungeon-width dungeon)))))
-       (center-deviation *default-center-deviation*)
        (recursion-depth *default-recursion-depth*)
+       (center-deviation *default-center-deviation*)
        (squareness-threshold *default-squareness-threshold*))
   "Generate a dungeon containing rooms connected by corridors using the BSP
 Rooms algorithm.
 
 Optionally, a dungeon may be passed as a key argument to this function, this
 function will then modify that dungeon instead of generating a new one."
-  (unless (null region)
-    (if (zerop recursion-depth)
-        (add-random-room dungeon region)
-        (let* ((position (get-random-center-deviation center-deviation))
-               (direction (get-split-direction region squareness-threshold))
-               (split-region-pair (split-region region direction position)))
-          (generate-bsp-rooms :dungeon dungeon
-                              :region (car split-region-pair)
-                              :recursion-depth (1- recursion-depth))
-          (generate-bsp-rooms :dungeon dungeon
-                              :region (cdr split-region-pair)
-                              :recursion-depth (1- recursion-depth))
-          (connect-region-pair split-region-pair))))
+  (generate-bsp-rooms-aux dungeon
+                          region
+                          recursion-depth
+                          center-deviation
+                          squareness-threshold)
   dungeon)
