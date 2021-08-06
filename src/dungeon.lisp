@@ -25,19 +25,6 @@
   "Get the width of a dungeon in number of tiles."
   (array-dimension (dungeon-tiles dungeon) 1))
 
-(defun set-dungeon-region-tile-symbol (dungeon region &optional (symbol nil))
-  "Set the tile symbol of the tiles within the given region of a dungeon, should
-the symbol be omitted, a random lowercase letter will be used instead."
-  (when (null symbol)
-    (flet ((get-random-character () (code-char (+ (random 26) (char-code #\a)))))
-      (setq symbol (get-random-character))))
-  (loop for y from (region-top-left-y region)
-          to (region-bottom-right-y region)
-        do (loop for x from (region-top-left-x region)
-                   to (region-bottom-right-x region)
-                 do (setf (tile-symbol (aref (dungeon-tiles dungeon) y x))
-                          symbol))))
-
 (defun print-dungeon (dungeon &optional (stream *standard-output*))
   "Print the text representation of a dungeon to STREAM."
   (let ((tiles (dungeon-tiles dungeon)))
@@ -46,3 +33,26 @@ the symbol be omitted, a random lowercase letter will be used instead."
       (dotimes (x (array-dimension tiles 1))
         (princ (tile-symbol (aref tiles y x)) stream))
       (terpri stream))))
+
+(flet ((fresh-char-set ()
+         (loop for i from 0 to 25
+               collect (code-char (+ i (char-code #\a))))))
+  (let ((char-set (fresh-char-set)))
+    (defun set-dungeon-region-tile-symbol (dungeon region &optional symbol)
+      "Set the tile symbol of the tiles within the given region of a dungeon.
+
+Should SYMBOL be omitted, a lowercase letter will be used instead. This letter
+is selected from the front of a set that initially contains the lowercase
+alphabet, the letters are removed upon selection, and the set is refilled when
+there are no remaining letters."
+      (when (null symbol)
+        (when (endp char-set)
+          (setq char-set (fresh-char-set)))
+        (setq symbol (car char-set))
+        (setq char-set (cdr char-set)))
+      (loop for y from (region-top-left-y region)
+              to (region-bottom-right-y region)
+            do (loop for x from (region-top-left-x region)
+                       to (region-bottom-right-x region)
+                     do (setf (tile-symbol (aref (dungeon-tiles dungeon) y x))
+                              symbol))))))
