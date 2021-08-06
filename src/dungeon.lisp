@@ -25,8 +25,12 @@
   "Get the width of a dungeon in number of tiles."
   (array-dimension (dungeon-tiles dungeon) 1))
 
-(defun set-dungeon-region-tile-symbol (dungeon region symbol)
-  "Set the tile symbol of the tiles within the given region of a dungeon."
+(defun set-dungeon-region-tile-symbol (dungeon region &optional (symbol nil))
+  "Set the tile symbol of the tiles within the given region of a dungeon, should
+the symbol be omitted, a random lowercase letter will be used instead."
+  (when (null symbol)
+    (flet ((get-random-character () (code-char (+ (random 26) (char-code #\a)))))
+      (setq symbol (get-random-character))))
   (loop for y from (region-top-left-y region)
           to (region-bottom-right-y region)
         do (loop for x from (region-top-left-x region)
