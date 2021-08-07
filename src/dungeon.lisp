@@ -9,12 +9,13 @@
   "Dungeon structure representing a dungeon in the world."
   (tiles #2A() :type simple-array))
 
-(defun generate-dungeon
-    (&key
+(defmethod generate-dungeon
+    ((type (eql 'default))
+     &key
        (height *default-dungeon-height*)
        (width *default-dungeon-width*)
        (symbol *default-tile-symbol*))
-  "Generate a new dungeon."
+  "Generate a default dungeon."
   (make-dungeon :tiles (make-tile-array2 height width symbol)))
 
 (defun dungeon-height (dungeon)

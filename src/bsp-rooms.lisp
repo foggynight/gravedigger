@@ -186,9 +186,10 @@ The direction is represented by a number:
                                   squareness-threshold)
           (connect-region-pair region-pair)))))
 
-(defun generate-bsp-rooms
-    (&key
-       (dungeon (generate-dungeon :symbol #\space))
+(defmethod generate-dungeon
+    ((type (eql 'bsp-rooms))
+     &key
+       (dungeon (generate-dungeon 'default :symbol #\space))
        (region (make-region :top-left (cons 0 0)
                             :bottom-right (cons (1- (dungeon-height dungeon))
                                                 (1- (dungeon-width dungeon)))))
@@ -198,8 +199,8 @@ The direction is represented by a number:
   "Generate a dungeon containing rooms connected by corridors using the BSP
 Rooms algorithm.
 
-Optionally, a dungeon may be passed as a key argument to this function, this
-function will then modify that dungeon instead of generating a new one."
+Should a dungeon be passed for the DUNGEON key parameter, that dungeon will be
+modified instead of generating a new one."
   (generate-bsp-rooms-aux dungeon
                           region
                           recursion-depth

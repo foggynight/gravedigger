@@ -3,4 +3,4 @@
 (setq *random-state* (make-random-state t))
 
 (defun main ()
-  (print-dungeon (generate-bsp-rooms)))
+  (print-dungeon (generate-dungeon 'bsp-rooms)))
