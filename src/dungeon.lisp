@@ -19,15 +19,21 @@
   (make-dungeon :tiles (make-tile-array2 height width symbol)))
 
 (defun dungeon-height (dungeon)
-  "Get the height of a dungeon in number of tiles."
+  "Get the height of DUNGEON in number of tiles."
   (array-dimension (dungeon-tiles dungeon) 0))
 
 (defun dungeon-width (dungeon)
-  "Get the width of a dungeon in number of tiles."
+  "Get the width of DUNGEON in number of tiles."
   (array-dimension (dungeon-tiles dungeon) 1))
 
+(defun dungeon-region (dungeon)
+  "Get the region covering DUNGEON."
+  (make-region :top-left (cons 0 0)
+               :bottom-right (cons (1- (dungeon-height dungeon))
+                                   (1- (dungeon-width dungeon)))))
+
 (defun print-dungeon (dungeon &optional (stream *standard-output*))
-  "Print the text representation of a dungeon to STREAM."
+  "Print the text representation of DUNGEON to STREAM."
   (let ((tiles (dungeon-tiles dungeon)))
     (fresh-line stream)
     (dotimes (y (array-dimension tiles 0))

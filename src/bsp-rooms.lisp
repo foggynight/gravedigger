@@ -190,9 +190,6 @@ The direction is represented by a number:
     ((type (eql 'bsp-rooms))
      &key
        (dungeon (generate-dungeon 'default :symbol #\space))
-       (region (make-region :top-left (cons 0 0)
-                            :bottom-right (cons (1- (dungeon-height dungeon))
-                                                (1- (dungeon-width dungeon)))))
        (recursion-depth *default-recursion-depth*)
        (center-deviation *default-center-deviation*)
        (squareness-threshold *default-squareness-threshold*))
@@ -202,7 +199,7 @@ Rooms algorithm.
 Should a dungeon be passed for the DUNGEON key parameter, that dungeon will be
 modified instead of generating a new one."
   (generate-bsp-rooms-aux dungeon
-                          region
+                          (dungeon-region dungeon)
                           recursion-depth
                           center-deviation
                           squareness-threshold)
