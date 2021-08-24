@@ -1,4 +1,4 @@
-(in-package :gravedigger)
+(in-package #:gravedigger)
 
 (defstruct region
   "Region structure representing a region of a dungeon, used to divide a dungeon

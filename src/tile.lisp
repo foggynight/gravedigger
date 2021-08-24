@@ -1,4 +1,4 @@
-(in-package :gravedigger)
+(in-package #:gravedigger)
 
 (defparameter *default-tile-symbol* #\space)
 

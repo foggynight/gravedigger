@@ -1,3 +1,3 @@
-(defpackage :gravedigger
-  (:use :cl)
-  (:export :main))
+(defpackage #:gravedigger
+  (:use #:cl)
+  (:export #:main))

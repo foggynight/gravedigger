@@ -5,7 +5,7 @@
 ;;
 ;; Reference: http://www.roguebasin.com/index.php?title=Basic_BSP_Dungeon_generation
 
-(in-package :gravedigger)
+(in-package #:gravedigger)
 
 (defparameter *default-min-room-length* 5
   "Default minimum height and width of a room.

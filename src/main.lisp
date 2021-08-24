@@ -1,4 +1,4 @@
-(in-package :gravedigger)
+(in-package #:gravedigger)
 
 (setq *random-state* (make-random-state t))
 

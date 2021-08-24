@@ -1,4 +1,4 @@
-(in-package :gravedigger)
+(in-package #:gravedigger)
 
 (defparameter *default-dungeon-height* 22
   "Default height of a dungeon in number of tiles.")

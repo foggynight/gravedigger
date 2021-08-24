@@ -1,4 +1,4 @@
-(asdf:defsystem :gravedigger
+(asdf:defsystem #:gravedigger
   :description "Procedural dungeon generator for rogue-likes and other
 tile-based games."
   :author "Robert Coffey"
