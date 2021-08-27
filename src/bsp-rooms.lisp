@@ -157,11 +157,11 @@ The direction is represented by a number:
 ;; TODO Implement this
 (defun connect-region-pair (region-pair))
 
-(defun generate-bsp-rooms-aux (dungeon
-                               region
-                               recursion-depth
-                               center-deviation
-                               squareness-threshold)
+(defun generate-bsp-rooms (dungeon
+                           region
+                           recursion-depth
+                           center-deviation
+                           squareness-threshold)
   "Auxiliary function to GENERATE-BSP-ROOMS, should not be called on its own!"
   ;; Must check if the region is null and do nothing if so, as region splitting
   ;; in recursively higher level calls to GENERATE-BSP-ROOMS-AUX may result in
@@ -172,16 +172,16 @@ The direction is represented by a number:
         (let* ((position (get-random-center-deviation center-deviation))
                (direction (get-split-direction region squareness-threshold))
                (region-pair (split-region region direction position)))
-          (generate-bsp-rooms-aux dungeon
-                                  (car region-pair)
-                                  (1- recursion-depth)
-                                  center-deviation
-                                  squareness-threshold)
-          (generate-bsp-rooms-aux dungeon
-                                  (cdr region-pair)
-                                  (1- recursion-depth)
-                                  center-deviation
-                                  squareness-threshold)
+          (generate-bsp-rooms dungeon
+                              (car region-pair)
+                              (1- recursion-depth)
+                              center-deviation
+                              squareness-threshold)
+          (generate-bsp-rooms dungeon
+                              (cdr region-pair)
+                              (1- recursion-depth)
+                              center-deviation
+                              squareness-threshold)
           (connect-region-pair region-pair)))))
 
 (defmethod generate-dungeon
@@ -200,9 +200,9 @@ modified instead of generating a new one.
 
 Should a region be passed to the REGION key parameter, only that region of the
 dungeon will be modified."
-  (generate-bsp-rooms-aux dungeon
-                          region
-                          recursion-depth
-                          center-deviation
-                          squareness-threshold)
+  (generate-bsp-rooms dungeon
+                      region
+                      recursion-depth
+                      center-deviation
+                      squareness-threshold)
   dungeon)
