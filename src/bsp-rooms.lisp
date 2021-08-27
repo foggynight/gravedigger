@@ -34,7 +34,7 @@ in GET-SPLIT-DIRECTION and GENERATE-BSP-ROOMS.")
 dimensions of REGION and the room length parameters.
 
 If no room can fit within REGION, this function returns NIL, otherwise, it
-returns a cons pair containing the height and width of the random room.
+returns a cons pair containing the height and width of a random room.
 
 For a room to fit within REGION, there must be a position within REGION where
 the room can be placed such that it lies completely within REGION, with a
@@ -115,18 +115,16 @@ edges of REGION, instead of at REGION's center."
                             (tile_type->symbol 'floor))))))
 
 (defun add-random-room (dungeon region &optional (random-placement nil))
-  "Add a room to the given region of a dungeon. The room is of random size and
-is placed in the center of the region unless RANDOM-PLACEMENT is non-nil, in
-which case the room is placed at a random position within the region.
+  "Add a random room to REGION. The room is of random size and is placed in the
+center of the region unless RANDOM-PLACEMENT is non-nil, in which case the room
+is placed at a random position within the region.
 
 This function must be called only once on a given region, as it does not check
 for other rooms, only for the boundaries of the region.
 
-If no room can fit within the region, this function does nothing."
-  (let* ((room-dimensions (get-random-room-dimensions region))
-         (height (car room-dimensions))
-         (width (cdr room-dimensions)))
-    (unless (or (null height) (null width))
+If no room can fit within REGION, this function does nothing."
+  (let ((room-dimensions (get-random-room-dimensions region)))
+    (unless (null room-dimensions)
       (add-room-tiles dungeon (get-room-region region
                                                room-dimensions
                                                random-placement)))))
@@ -142,15 +140,15 @@ If no room can fit within the region, this function does nothing."
 (defun get-split-direction
     (region
      &optional (squareness-threshold *default-squareness-threshold*))
-  "Get a direction along which to split a region based on its squareness.
+  "Get a direction along which to split REGION based on its squareness.
 
-If the squareness of the region is below SQUARENESS-THRESHOLD, the direction is
+If the squareness of REGION is below SQUARENESS-THRESHOLD, the direction is
 chosen randomly, otherwise the chosen direction is that which splits the larger
-dimension.
+dimension of REGION.
 
 The direction is represented by a number:
-- 0 (horizontal): Split the region into top and bottom sub-regions
-- 1 (vertical): Split the region into left and right sub-regions"
+- 0 (horizontal): Split REGION into top and bottom sub-regions
+- 1 (vertical): Split REGION into left and right sub-regions"
   (let ((squareness (region-squareness region)))
     (if (< (abs squareness) squareness-threshold)
         (random 2)
@@ -197,10 +195,10 @@ The direction is represented by a number:
   "Generate a dungeon containing rooms connected by corridors using the BSP
 Rooms algorithm.
 
-Should a dungeon be passed for the DUNGEON key parameter, that dungeon will be
+Should a dungeon be passed to the DUNGEON key parameter, that dungeon will be
 modified instead of generating a new one.
 
-Should a region be passed for the REGION key parameter, only that region of the
+Should a region be passed to the REGION key parameter, only that region of the
 dungeon will be modified."
   (generate-bsp-rooms-aux dungeon
                           region
