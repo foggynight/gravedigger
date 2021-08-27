@@ -187,7 +187,7 @@ The direction is represented by a number:
 (defmethod generate-dungeon
     ((type (eql :bsp-rooms))
      &key
-       (dungeon (generate-dungeon 'default :symbol #\space))
+       (dungeon (generate-dungeon :default :symbol #\space))
        (region (dungeon-region dungeon))
        (recursion-depth *default-recursion-depth*)
        (center-deviation *default-center-deviation*)
