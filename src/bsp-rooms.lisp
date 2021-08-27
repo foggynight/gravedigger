@@ -58,7 +58,7 @@ to be placed within REGION.
 
 Should RANDOM-PLACEMENT be non-nil, the room region is randomly placed within
 REGION such that there is a one-tile gap between the walls of the room and the
-edges of the region, instead of at REGION's center."
+edges of REGION, instead of at REGION's center."
   (let ((offset-y nil)
         (offset-x nil))
     (if random-placement
@@ -82,7 +82,7 @@ edges of the region, instead of at REGION's center."
                                         (1- (cdr room-dimensions)))))))
 
 (defun add-room-tiles (dungeon room)
-  "Add the floor and wall tiles of a room to a dungeon."
+  "Add the floor and wall tiles of ROOM to DUNGEON."
   (let ((tly (region-top-left-y room))
         (tlx (region-top-left-x room))
         (bry (region-bottom-right-y room))
@@ -187,7 +187,7 @@ The direction is represented by a number:
           (connect-region-pair region-pair)))))
 
 (defmethod generate-dungeon
-    ((type (eql 'bsp-rooms))
+    ((type (eql :bsp-rooms))
      &key
        (dungeon (generate-dungeon 'default :symbol #\space))
        (region (dungeon-region dungeon))

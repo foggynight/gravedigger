@@ -10,7 +10,7 @@
   (tiles #2A() :type simple-array))
 
 (defmethod generate-dungeon
-    ((type (eql 'default))
+    ((type (eql :default))
      &key
        (height *default-dungeon-height*)
        (width *default-dungeon-width*)
